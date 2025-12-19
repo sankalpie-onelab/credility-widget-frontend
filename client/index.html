@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aadhaar Document Submission Form</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Times New Roman", serif;
+      background: #f4f4f1;
+      color: #000;
+    }
+
+    .header {
+      text-align: center;
+      padding: 10px 0;
+      border-bottom: 3px solid #000;
+      font-size: 22px;
+      font-weight: bold;
+      text-transform: uppercase;
+      background: #e6e6d6;
+    }
+
+    .form-container {
+      width: 700px;
+      margin: 30px auto;
+      padding: 20px;
+      border: 2px solid #000;
+      background: #fffef5;
+    }
+
+    .section-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 15px;
+      text-decoration: underline;
+    }
+
+    label {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    /* ===== Horizontal Row ===== */
+    .upload-submit-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 15px;
+    }
+
+    .upload-column {
+      flex: 3;
+    }
+
+    .submit-column {
+      flex: 1;
+    }
+
+    input[type="file"] {
+      border: 1px solid #000;
+      padding: 6px;
+      width: 100%;
+      background: #fafafa;
+      font-size: 15px;
+    }
+
+    .file-name {
+      margin-top: 8px;
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #d9d9d9;
+      border: 2px solid #000;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .btn:hover {
+      background: #c7c7c7;
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 13px;
+      color: #444;
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    Government of India - Aadhaar Document Submission Form
+  </div>
+
+  <div class="form-container">
+
+    <div class="section-title">Section 1: Document Upload</div>
+
+    <div class="upload-submit-row">
+      <!-- Upload -->
+      <div class="upload-column">
+        <label for="aadhaarInput">
+          Upload Aadhaar Document (PDF / JPG / PNG)
+        </label>
+        <input
+          type="file"
+          id="aadhaarInput"
+          accept=".pdf,.jpg,.jpeg,.png"
+        />
+        <div class="file-name" id="fileName"></div>
+      </div>
+
+      <!-- Submit -->
+      <div class="submit-column">
+        <button class="btn" id="validateBtn">
+          Submit
+        </button>
+      </div>
+      <!-- NEW: Inline validation result container -->
+      <div id="validation-result-inline">
+
+      </div>
+    </div>
+
+
+    <div class="footer-note">
+      Please ensure the document is clear and readable. This is not an official government website.
+    </div>
+
+  </div>
+
+  <script src="../widget/dist/doc-validator-widget.js"></script>
+
+  <script>
+    const fileInput = document.getElementById("aadhaarInput");
+    const fileNameDisplay = document.getElementById("fileName");
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      fileNameDisplay.textContent = file
+        ? "Selected File: " + file.name
+        : "";
+    });
+
+    // Initialize the inline widget once (shows latest validation result)
+    DocumentValidator.renderInline('validation-result-inline');
+
+    document.getElementById("validateBtn").onclick = () => {
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Please upload your Aadhaar document before submitting.");
+        return;
+      }
+
+      DocumentValidator.validateAadhaar(file);
+      // The inline widget will automatically update when validation completes!
+    };
+  </script>
+
+</body>
+</html>
