@@ -122,73 +122,73 @@
 
     <!-- Form Section -->
     <div class="form-section">
-      <div class="section-title">Multiple Independent Aadhaar Document Uploads</div>
+      <div class="section-title">Aadhaar Document Uploads</div>
       
       <!-- Form 1: Primary Applicant -->
       <div>
-        <label for="applicant1File">
+        <label for="doc1">
           First Document
         </label>
         <div class="form-row">
           <div>
-            <input type="file" id="applicant1File" accept=".pdf,.jpg,.jpeg,.png" />
-            <div class="file-name" id="fileName1"></div>
+            <input type="file" id="doc1" accept=".pdf,.jpg,.jpeg,.png" data-validator-id="validator1" />
+            <div class="file-name" data-file-for="doc1"></div>
           </div>
           
           <div>
-            <button class="btn" id="validateBtn1">
+            <button class="btn" data-validate-for="doc1" data-validator-id="validator1">
               Validate
             </button>
           </div>
           
           <div class="widget-container">
-            <div id="widget-container-1"></div>
+            <div data-widget-for="validator1"></div>
           </div>
         </div>
       </div>
 
       <!-- Form 2: Secondary Applicant -->
       <div style="margin-top: 20px;">
-        <label for="applicant2File">
+        <label for="doc2">
           Second Document
         </label>
         <div class="form-row">
           <div>
-            <input type="file" id="applicant2File" accept=".pdf,.jpg,.jpeg,.png" />
-            <div class="file-name" id="fileName2"></div>
+            <input type="file" id="doc2" accept=".pdf,.jpg,.jpeg,.png" data-validator-id="validator2" />
+            <div class="file-name" data-file-for="doc2"></div>
           </div>
           
           <div>
-            <button class="btn" id="validateBtn2">
+            <button class="btn" data-validate-for="doc2" data-validator-id="validator2">
               Validate
             </button>
           </div>
           
           <div class="widget-container">
-            <div id="widget-container-2"></div>
+            <div data-widget-for="validator2"></div>
           </div>
         </div>
       </div>
 
       <!-- Form 3: Third Applicant (Optional) -->
       <div style="margin-top: 20px;">
-        <label for="applicant3File">
+        <label for="doc3">
           Third Document
         </label>
         <div class="form-row">
           <div>
-            <input type="file" id="applicant3File" accept=".pdf,.jpg,.jpeg,.png" />
-            <div class="file-name" id="fileName3"></div>
+            <input type="file" id="doc3" accept=".pdf,.jpg,.jpeg,.png" data-validator-id="validator3" />
+            <div class="file-name" data-file-for="doc3"></div>
           </div>
           
           <div>
-            <button class="btn" id="validateBtn3">
+            <button class="btn" data-validate-for="doc3" data-validator-id="validator3">
               Validate
             </button>
           </div>
           
           <div class="widget-container">
-            <div id="widget-container-3"></div>
+            <div data-widget-for="validator3"></div>
           </div>
         </div>
       </div>
@@ -203,73 +203,11 @@
   <script src="../widget/dist/doc-validator-widget.js"></script>
 
   <script>
-    // Store validator instances
-    let validator1, validator2, validator3;
-    
-    // Initialize when page loads
+    // The client just needs to include this simple script
     document.addEventListener('DOMContentLoaded', () => {
-      // Create separate validator instances for each form
-      validator1 = DocumentValidator.createValidator('widget-container-1');
-      validator2 = DocumentValidator.createValidator('widget-container-2');
-      validator3 = DocumentValidator.createValidator('widget-container-3');
-      
-      // Render widgets
-      validator1.render();
-      validator2.render();
-      validator3.render();
-      
-      // Setup file name displays for Form 1
-      document.getElementById('applicant1File').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        document.getElementById('fileName1').textContent = file 
-          ? "Selected: " + file.name 
-          : "";
-      });
-      
-      // Setup file name displays for Form 2
-      document.getElementById('applicant2File').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        document.getElementById('fileName2').textContent = file 
-          ? "Selected: " + file.name 
-          : "";
-      });
-      
-      // Setup file name displays for Form 3
-      document.getElementById('applicant3File').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        document.getElementById('fileName3').textContent = file 
-          ? "Selected: " + file.name 
-          : "";
-      });
-      
-      // Setup button handlers
-      document.getElementById('validateBtn1').onclick = () => validateForm(1);
-      document.getElementById('validateBtn2').onclick = () => validateForm(2);
-      document.getElementById('validateBtn3').onclick = () => validateForm(3);
+      // Auto-initialize all widgets
+      DocumentValidator.autoInitialize();
     });
-    
-    function validateForm(formNumber) {
-      const fileInput = document.getElementById(`applicant${formNumber}File`);
-      const file = fileInput.files[0];
-      
-      if (!file) {
-        alert(`Please select a file for Form ${formNumber}`);
-        return;
-      }
-        
-      // Use the appropriate validator instance
-      switch(formNumber) {
-        case 1:
-          validator1.validateAadhaar(file);
-          break;
-        case 2:
-          validator2.validateAadhaar(file);
-          break;
-        case 3:
-          validator3.validateAadhaar(file);
-          break;
-      }
-    }
   </script>
 
 </body>
