@@ -25,7 +25,7 @@
     }
 
     .form-container {
-      width: 700px;
+      width: 800px;
       margin: 30px auto;
       padding: 20px;
       border: 2px solid #000;
@@ -39,6 +39,13 @@
       text-decoration: underline;
     }
 
+    .form-section {
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #999;
+      background: #fff;
+    }
+
     label {
       display: block;
       font-size: 16px;
@@ -46,19 +53,23 @@
       font-weight: bold;
     }
 
-    /* ===== Horizontal Row ===== */
-    .upload-submit-row {
+    /* ===== Horizontal Row for form elements ===== */
+    .form-row {
       display: flex;
       align-items: flex-end;
       gap: 15px;
+      margin-top: 15px;
     }
 
-    .upload-column {
-      flex: 3;
-    }
-
-    .submit-column {
+    .form-row > div {
       flex: 1;
+    }
+
+    .widget-container {
+      min-width: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     input[type="file"] {
@@ -73,6 +84,7 @@
       margin-top: 8px;
       font-size: 15px;
       font-style: italic;
+      min-height: 20px;
     }
 
     .btn {
@@ -108,34 +120,79 @@
 
   <div class="form-container">
 
-    <div class="section-title">Section 1: Document Upload</div>
-
-    <div class="upload-submit-row">
-      <!-- Upload -->
-      <div class="upload-column">
-        <label for="aadhaarInput">
-          Upload Aadhaar Document (PDF / JPG / PNG)
+    <!-- Form Section -->
+    <div class="form-section">
+      <div class="section-title">Multiple Independent Aadhaar Document Uploads</div>
+      
+      <!-- Form 1: Primary Applicant -->
+      <div>
+        <label for="applicant1File">
+          First Document
         </label>
-        <input
-          type="file"
-          id="aadhaarInput"
-          accept=".pdf,.jpg,.jpeg,.png"
-        />
-        <div class="file-name" id="fileName"></div>
+        <div class="form-row">
+          <div>
+            <input type="file" id="applicant1File" accept=".pdf,.jpg,.jpeg,.png" />
+            <div class="file-name" id="fileName1"></div>
+          </div>
+          
+          <div>
+            <button class="btn" id="validateBtn1">
+              Validate
+            </button>
+          </div>
+          
+          <div class="widget-container">
+            <div id="widget-container-1"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- Submit -->
-      <div class="submit-column">
-        <button class="btn" id="validateBtn">
-          Submit
-        </button>
+      <!-- Form 2: Secondary Applicant -->
+      <div style="margin-top: 20px;">
+        <label for="applicant2File">
+          Second Document
+        </label>
+        <div class="form-row">
+          <div>
+            <input type="file" id="applicant2File" accept=".pdf,.jpg,.jpeg,.png" />
+            <div class="file-name" id="fileName2"></div>
+          </div>
+          
+          <div>
+            <button class="btn" id="validateBtn2">
+              Validate
+            </button>
+          </div>
+          
+          <div class="widget-container">
+            <div id="widget-container-2"></div>
+          </div>
+        </div>
       </div>
-      <!-- NEW: Inline validation result container -->
-      <div id="validation-result-inline">
 
+      <!-- Form 3: Third Applicant (Optional) -->
+      <div style="margin-top: 20px;">
+        <label for="applicant3File">
+          Third Document
+        </label>
+        <div class="form-row">
+          <div>
+            <input type="file" id="applicant3File" accept=".pdf,.jpg,.jpeg,.png" />
+            <div class="file-name" id="fileName3"></div>
+          </div>
+          
+          <div>
+            <button class="btn" id="validateBtn3">
+              Validate
+            </button>
+          </div>
+          
+          <div class="widget-container">
+            <div id="widget-container-3"></div>
+          </div>
+        </div>
       </div>
     </div>
-
 
     <div class="footer-note">
       Please ensure the document is clear and readable. This is not an official government website.
@@ -146,30 +203,73 @@
   <script src="../widget/dist/doc-validator-widget.js"></script>
 
   <script>
-    const fileInput = document.getElementById("aadhaarInput");
-    const fileNameDisplay = document.getElementById("fileName");
-
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
-      fileNameDisplay.textContent = file
-        ? "Selected File: " + file.name
-        : "";
+    // Store validator instances
+    let validator1, validator2, validator3;
+    
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      // Create separate validator instances for each form
+      validator1 = DocumentValidator.createValidator('widget-container-1');
+      validator2 = DocumentValidator.createValidator('widget-container-2');
+      validator3 = DocumentValidator.createValidator('widget-container-3');
+      
+      // Render widgets
+      validator1.render();
+      validator2.render();
+      validator3.render();
+      
+      // Setup file name displays for Form 1
+      document.getElementById('applicant1File').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        document.getElementById('fileName1').textContent = file 
+          ? "Selected: " + file.name 
+          : "";
+      });
+      
+      // Setup file name displays for Form 2
+      document.getElementById('applicant2File').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        document.getElementById('fileName2').textContent = file 
+          ? "Selected: " + file.name 
+          : "";
+      });
+      
+      // Setup file name displays for Form 3
+      document.getElementById('applicant3File').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        document.getElementById('fileName3').textContent = file 
+          ? "Selected: " + file.name 
+          : "";
+      });
+      
+      // Setup button handlers
+      document.getElementById('validateBtn1').onclick = () => validateForm(1);
+      document.getElementById('validateBtn2').onclick = () => validateForm(2);
+      document.getElementById('validateBtn3').onclick = () => validateForm(3);
     });
-
-    // Initialize the inline widget once (shows latest validation result)
-    DocumentValidator.renderInline('validation-result-inline');
-
-    document.getElementById("validateBtn").onclick = () => {
+    
+    function validateForm(formNumber) {
+      const fileInput = document.getElementById(`applicant${formNumber}File`);
       const file = fileInput.files[0];
-
+      
       if (!file) {
-        alert("Please upload your Aadhaar document before submitting.");
+        alert(`Please select a file for Form ${formNumber}`);
         return;
       }
-
-      DocumentValidator.validateAadhaar(file);
-      // The inline widget will automatically update when validation completes!
-    };
+        
+      // Use the appropriate validator instance
+      switch(formNumber) {
+        case 1:
+          validator1.validateAadhaar(file);
+          break;
+        case 2:
+          validator2.validateAadhaar(file);
+          break;
+        case 3:
+          validator3.validateAadhaar(file);
+          break;
+      }
+    }
   </script>
 
 </body>

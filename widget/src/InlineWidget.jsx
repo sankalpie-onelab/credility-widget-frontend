@@ -21,7 +21,6 @@ export default function InlineWidget({ store }) {
     const isFailed = task?.status === "FAIL";
     const isError = task?.status === "ERROR";
 
-    // ICONS
     const icons = {
         idle: "🤖",
         loading: "⏳",
@@ -73,6 +72,7 @@ export default function InlineWidget({ store }) {
                 cursor: "default",
                 userSelect: "none",
                 boxShadow: "0 1px 0 #00000040",
+                minWidth: "140px"
             }}
         >
             <span style={{ fontSize: "14px" }}>{icon}</span>
@@ -90,6 +90,20 @@ export default function InlineWidget({ store }) {
                     ? "Error"
                     : "Idle"}
             </span>
+            
+            {task?.fileName && (
+                <span style={{ 
+                    fontSize: "11px", 
+                    color: "#666",
+                    marginLeft: "auto",
+                    maxWidth: "100px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
+                }}>
+                    {task.fileName}
+                </span>
+            )}
         </div>
     );
 }
