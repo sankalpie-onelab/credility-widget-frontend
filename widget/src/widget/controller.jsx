@@ -7,7 +7,7 @@ import InlineWidget from "../InlineWidget";
 // Create a map to store widget instances
 const widgetInstances = new Map();
 
-// Simple auto-initialization function
+// Enhanced auto-initialization that finds elements by DOM structure
 function autoInitializeWidgets() {
   // Find all widget containers
   const widgetContainers = document.querySelectorAll('[data-widget-for]');
@@ -15,32 +15,41 @@ function autoInitializeWidgets() {
   widgetContainers.forEach(container => {
     const validatorId = container.getAttribute('data-widget-for');
     
-    // Get agent ID from the corresponding input
-    const fileInput = document.querySelector(`[data-validator-id="${validatorId}"]`);
-    const agentId = fileInput?.getAttribute('data-agent-id') || 'aadhar_card_validator_s5';
+    // Find related elements using DOM traversal instead of data attributes
+    const formRow = container.closest('.form-row');
+    if (!formRow) return;
     
-    // Create and render widget with agent ID
+    // Find file input in the same row
+    const fileInput = formRow.querySelector('input[type="file"]');
+    if (!fileInput) return;
+    
+    // Get agent ID from input or use default
+    const agentId = fileInput.getAttribute('data-agent-id') || 'aadhar_card_validator_s5';
+    
+    // Find file display element
+    const fileDisplay = formRow.querySelector('.file-name');
+    
+    // Find validate button in the same row
+    const button = formRow.querySelector('button.btn, button[type="button"], button');
+    
+    // Create and render widget
     const validator = DocumentValidator.createValidator(validatorId, agentId);
     validator.render();
     
     // Setup file name display
-    if (fileInput) {
-      const fileDisplay = document.querySelector(`[data-file-for="${fileInput.id}"]`);
-      if (fileDisplay) {
-        fileInput.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          fileDisplay.textContent = file ? "Selected: " + file.name : "";
-        });
-      }
+    if (fileDisplay) {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        fileDisplay.textContent = file ? "Selected: " + file.name : "";
+      });
     }
     
     // Setup button click
-    const button = document.querySelector(`[data-validate-for="${fileInput?.id}"]`);
     if (button) {
       button.addEventListener('click', () => {
         const file = fileInput?.files[0];
         if (!file) {
-          alert(`Please select a file for ${fileInput?.id || 'this document'}`);
+          alert(`Please select a file`);
           return;
         }
         validator.validate(file);

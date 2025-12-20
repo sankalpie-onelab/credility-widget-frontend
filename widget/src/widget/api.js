@@ -4,7 +4,7 @@ export async function callValidationAgent(file, agentId) {
   formData.append("user_id", "dev123");
 
   const res = await fetch(
-    `http://localhost:8000/api/agent/${agentId}/validate`,
+    `http://13.233.155.255:8000/api/agent/${agentId}/validate`,
     {
       method: "POST",
       body: formData
@@ -20,7 +20,7 @@ export async function callValidationAgent(file, agentId) {
 
 export async function fetchAgentStats(agentId) {
   const res = await fetch(
-    `http://localhost:8000/api/agent/${agentId}/stats`
+    `http://13.233.155.255:8000/api/agent/${agentId}/stats`
   );
 
   if (!res.ok) {
