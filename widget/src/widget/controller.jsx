@@ -1,5 +1,5 @@
 import { createWidgetStore } from "./store";
-import { callAadhaarAgent } from "./api";
+import { callValidationAgent } from "./api";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import InlineWidget from "../InlineWidget";
@@ -15,12 +15,15 @@ function autoInitializeWidgets() {
   widgetContainers.forEach(container => {
     const validatorId = container.getAttribute('data-widget-for');
     
-    // Create and render widget
-    const validator = DocumentValidator.createValidator(validatorId);
+    // Get agent ID from the corresponding input
+    const fileInput = document.querySelector(`[data-validator-id="${validatorId}"]`);
+    const agentId = fileInput?.getAttribute('data-agent-id') || 'aadhar_card_validator_s5';
+    
+    // Create and render widget with agent ID
+    const validator = DocumentValidator.createValidator(validatorId, agentId);
     validator.render();
     
     // Setup file name display
-    const fileInput = document.querySelector(`[data-validator-id="${validatorId}"]`);
     if (fileInput) {
       const fileDisplay = document.querySelector(`[data-file-for="${fileInput.id}"]`);
       if (fileDisplay) {
@@ -40,7 +43,7 @@ function autoInitializeWidgets() {
           alert(`Please select a file for ${fileInput?.id || 'this document'}`);
           return;
         }
-        validator.validateAadhaar(file);
+        validator.validate(file);
       });
     }
   });
@@ -48,7 +51,7 @@ function autoInitializeWidgets() {
 
 window.DocumentValidator = {
   // Method to create a new validator instance
-  createValidator: (validatorId) => {
+  createValidator: (validatorId, agentId = 'aadhar_card_validator_s5') => {
     // Check if already exists
     if (widgetInstances.has(validatorId)) {
       return widgetInstances.get(validatorId);
@@ -59,16 +62,17 @@ window.DocumentValidator = {
     const validator = {
       store,
       id: validatorId,
+      agentId: agentId,
       
-      validateAadhaar: async (file) => {
+      validate: async (file) => {
         if (!file) {
-          console.error("No file passed to validateAadhaar");
+          console.error("No file passed to validate");
           return;
         }
 
         const task = {
           id: crypto.randomUUID(),
-          type: "AADHAAR",
+          type: validator.agentId.toUpperCase(),
           status: "RUNNING",
           score: null,
           response: null,
@@ -78,7 +82,7 @@ window.DocumentValidator = {
         store.addTask(task);
 
         try {
-          const res = await callAadhaarAgent(file);
+          const res = await callValidationAgent(file, validator.agentId);
 
           store.updateTask(task.id, {
             status: res.status.toUpperCase(),
@@ -135,16 +139,15 @@ window.DocumentValidator = {
   autoInitialize: autoInitializeWidgets,
 
   // Legacy method for backward compatibility
-  validateAadhaar: async (file) => {
-    // Use a default store if exists
+  validate: async (file, agentId = 'aadhar_card_validator_s5') => {
     const defaultValidator = widgetInstances.get('default') || 
-      DocumentValidator.createValidator('default');
+      DocumentValidator.createValidator('default', agentId);
     
-    return defaultValidator.validateAadhaar(file);
+    return defaultValidator.validate(file);
   },
 
-  renderInline: (containerId) => {
-    const validator = DocumentValidator.createValidator(containerId);
+  renderInline: (containerId, agentId = 'aadhar_card_validator_s5') => {
+    const validator = DocumentValidator.createValidator(containerId, agentId);
     return validator.render();
   }
 };

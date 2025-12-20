@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fetchAgentStats } from "./widget/api";
 
 export default function WidgetApp({ store }) {
   const [tasks, setTasks] = useState([]);
@@ -8,25 +9,44 @@ export default function WidgetApp({ store }) {
   const [globalLogs, setGlobalLogs] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [availableAgents, setAvailableAgents] = useState([]);
+  const [selectedAgent, setSelectedAgent] = useState(null);
 
   useEffect(() => {
     store.subscribe(setTasks);
   }, []);
 
-  // Fetch global stats when expanded
+  // Discover available agents from the page
   useEffect(() => {
-    if (isExpanded && globalLogs.length === 0) {
+    const inputs = document.querySelectorAll('[data-agent-id]');
+    const agents = new Set();
+    inputs.forEach(input => {
+      const agentId = input.getAttribute('data-agent-id');
+      if (agentId) agents.add(agentId);
+    });
+    
+    const agentList = Array.from(agents);
+    setAvailableAgents(agentList);
+    
+    // Set default selected agent
+    if (agentList.length > 0 && !selectedAgent) {
+      setSelectedAgent(agentList[0]);
+    }
+  }, []);
+
+  // Fetch global stats when expanded or agent changes
+  useEffect(() => {
+    if (isExpanded && selectedAgent) {
       fetchGlobalStats();
     }
-  }, [isExpanded]);
+  }, [isExpanded, selectedAgent]);
 
   const fetchGlobalStats = async () => {
+    if (!selectedAgent) return;
+    
     setLoading(true);
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/agent/aadhar_card_validator_s5/stats"
-      );
-      const data = await response.json();
+      const data = await fetchAgentStats(selectedAgent);
 
       if (data.success) {
         setStats(data.stats);
@@ -37,6 +57,12 @@ export default function WidgetApp({ store }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAgentChange = (agentId) => {
+    setSelectedAgent(agentId);
+    setDetailView(false);
+    setSelectedLog(null);
   };
 
   const getFileType = (url = "") => {
@@ -96,38 +122,16 @@ export default function WidgetApp({ store }) {
     }
   };
 
+  const formatAgentName = (agentId) => {
+    // Convert agent_id to readable name
+    return agentId
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+      .replace(/\s+S\d+$/, ''); // Remove version suffix like "S5"
+  };
+
   return (
     <>
-      {/* Bottom Left - Current Status Circle (Session based) */}
-      {/* {latest && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "20px",
-            width: "70px",
-            height: "70px",
-            borderRadius: "50%",
-            background: getStatusColor(latest.status),
-            color: "#fff",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "11px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            zIndex: 9998,
-          }}
-        >
-          <strong style={{ fontSize: "12px" }}>{latest.status}</strong>
-          {latest.score !== null && (
-            <span style={{ fontSize: "10px", marginTop: "2px" }}>
-              {latest.score}
-            </span>
-          )}
-        </div>
-      )} */}
-
       {/* Bottom Right - Chat Bubble / Expanded Panel */}
       {!isExpanded ? (
         // Collapsed: Chat Bubble
@@ -175,7 +179,7 @@ export default function WidgetApp({ store }) {
             <circle cx="15" cy="14" r="1" />
           </svg>
           {/* Notification Badge */}
-          {globalLogs.length > 0 && (
+          {stats && stats.total_hits > 0 && (
             <div
               style={{
                 position: "absolute",
@@ -194,7 +198,7 @@ export default function WidgetApp({ store }) {
                 border: "2px solid #fff",
               }}
             >
-              {stats?.total_hits || globalLogs.length}
+              {stats.total_hits}
             </div>
           )}
         </div>
@@ -229,7 +233,7 @@ export default function WidgetApp({ store }) {
               alignItems: "center",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
               <svg
                 width="24"
                 height="24"
@@ -240,10 +244,15 @@ export default function WidgetApp({ store }) {
               >
                 <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <div>
+              <div style={{ flex: 1 }}>
                 <strong style={{ fontSize: "16px", display: "block" }}>
                   History & Logs
                 </strong>
+                {availableAgents.length > 1 && (
+                  <span style={{ fontSize: "11px", opacity: 0.9 }}>
+                    {availableAgents.length} agents available
+                  </span>
+                )}
               </div>
             </div>
             <button
@@ -270,6 +279,74 @@ export default function WidgetApp({ store }) {
               ×
             </button>
           </div>
+
+          {/* Agent Selector */}
+          {availableAgents.length > 1 && (
+            <div
+              style={{
+                padding: "12px 20px",
+                background: "#f9fafb",
+                borderBottom: "1px solid #e5e7eb",
+              }}
+            >
+              <div style={{ fontSize: "11px", color: "#6b7280", marginBottom: "8px", fontWeight: "600" }}>
+                SELECT AGENT
+              </div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {availableAgents.map((agentId) => (
+                  <button
+                    key={agentId}
+                    onClick={() => handleAgentChange(agentId)}
+                    style={{
+                      padding: "8px 14px",
+                      background: selectedAgent === agentId ? "#667eea" : "#fff",
+                      color: selectedAgent === agentId ? "#fff" : "#374151",
+                      border: selectedAgent === agentId ? "none" : "1px solid #d1d5db",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      transition: "all 0.2s",
+                      flex: "1 1 auto",
+                      minWidth: "0",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedAgent !== agentId) {
+                        e.currentTarget.style.background = "#f3f4f6";
+                        e.currentTarget.style.borderColor = "#9ca3af";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedAgent !== agentId) {
+                        e.currentTarget.style.background = "#fff";
+                        e.currentTarget.style.borderColor = "#d1d5db";
+                      }
+                    }}
+                  >
+                    {formatAgentName(agentId)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Single Agent Display (when only one agent) */}
+          {availableAgents.length === 1 && selectedAgent && (
+            <div
+              style={{
+                padding: "10px 20px",
+                background: "#f9fafb",
+                borderBottom: "1px solid #e5e7eb",
+                fontSize: "12px",
+                color: "#6b7280",
+              }}
+            >
+              <span style={{ fontWeight: "600" }}>Agent:</span>{" "}
+              <span style={{ color: "#667eea", fontWeight: "600" }}>
+                {formatAgentName(selectedAgent)}
+              </span>
+            </div>
+          )}
 
           {/* Stats Bar */}
           {stats && (
@@ -321,7 +398,28 @@ export default function WidgetApp({ store }) {
                 padding: "16px",
               }}
             >
-              {loading ? (
+              {!selectedAgent ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px 20px",
+                    color: "#9ca3af",
+                  }}
+                >
+                  <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    style={{ margin: "0 auto 12px" }}
+                  >
+                    <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <p style={{ fontSize: "14px", margin: 0 }}>Select an agent to view logs</p>
+                </div>
+              ) : loading ? (
                 <div
                   style={{
                     textAlign: "center",
@@ -361,7 +459,9 @@ export default function WidgetApp({ store }) {
                   >
                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <p style={{ fontSize: "14px", margin: 0 }}>No validation history yet</p>
+                  <p style={{ fontSize: "14px", margin: 0 }}>
+                    No validation history yet for {formatAgentName(selectedAgent)}
+                  </p>
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -460,7 +560,6 @@ export default function WidgetApp({ store }) {
                 padding: "16px",
               }}
             >
-              {/* Back Button */}
               <button
                 onClick={handleBackToList}
                 style={{
@@ -482,7 +581,6 @@ export default function WidgetApp({ store }) {
 
               {selectedLog && (
                 <div style={{ fontSize: "13px" }}>
-                  {/* Status Badge */}
                   <div
                     style={{
                       display: "inline-block",
@@ -498,7 +596,6 @@ export default function WidgetApp({ store }) {
                     {selectedLog.status.toUpperCase()} - Score: {selectedLog.score}
                   </div>
 
-                  {/* Overview */}
                   <div
                     style={{
                       background: "#f9fafb",
@@ -560,7 +657,6 @@ export default function WidgetApp({ store }) {
                     </div>
                   </div>
 
-                  {/* Extracted Data */}
                   {selectedLog.doc_extracted_json && (
                     <div style={{ marginBottom: "12px" }}>
                       <div
@@ -591,7 +687,6 @@ export default function WidgetApp({ store }) {
                     </div>
                   )}
 
-                  {/* Validation Results */}
                   {selectedLog.reason && (
                     <div>
                       <div
@@ -605,7 +700,6 @@ export default function WidgetApp({ store }) {
                         Validation Results
                       </div>
 
-                      {/* Score Explanation */}
                       <div
                         style={{
                           background: "#eff6ff",
@@ -619,7 +713,6 @@ export default function WidgetApp({ store }) {
                         {selectedLog.reason.score_explanation}
                       </div>
 
-                      {/* Pass Conditions */}
                       {selectedLog.reason.pass_conditions?.length > 0 && (
                         <div style={{ marginBottom: "8px" }}>
                           <div
@@ -650,7 +743,6 @@ export default function WidgetApp({ store }) {
                         </div>
                       )}
 
-                      {/* Fail Conditions */}
                       {selectedLog.reason.fail_conditions?.length > 0 && (
                         <div>
                           <div
@@ -683,7 +775,6 @@ export default function WidgetApp({ store }) {
                     </div>
                   )}
 
-                  {/* Document Preview */}
                   {selectedLog.file_input && (
                     <div style={{ marginTop: "16px" }}>
                       <div

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aadhaar Document Submission Form</title>
+  <title>Multi-Agent Document Validation Demo</title>
 
   <style>
     body {
@@ -46,6 +46,17 @@
       background: #fff;
     }
 
+    .agent-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #667eea;
+      color: white;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
     label {
       display: block;
       font-size: 16px;
@@ -53,7 +64,6 @@
       font-weight: bold;
     }
 
-    /* ===== Horizontal Row for form elements ===== */
     .form-row {
       display: flex;
       align-items: flex-end;
@@ -102,6 +112,21 @@
       background: #c7c7c7;
     }
 
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .info-title {
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 8px;
+    }
+
     .footer-note {
       margin-top: 30px;
       text-align: center;
@@ -115,97 +140,186 @@
 <body>
 
   <div class="header">
-    Government of India - Aadhaar Document Submission Form
+    Government of India - Multi-Agent Document Validation System
   </div>
 
   <div class="form-container">
 
-    <!-- Form Section -->
+    <!-- Info Box -->
+    <div class="info-box">
+      <div class="info-title">📊 Multi-Agent History Viewer</div>
+      <p style="margin: 0;">
+        This demo shows multiple validation agents working together. 
+        Click the purple bubble (bottom-right) to view the history panel 
+        where you can <strong>switch between different agents</strong> to view their individual logs and statistics.
+      </p>
+    </div>
+
+    <!-- Form Section: Aadhaar Cards -->
     <div class="form-section">
-      <div class="section-title">Aadhaar Document Uploads</div>
+      <div class="section-title">
+        Aadhaar Card Validation
+      </div>
       
-      <!-- Form 1: Primary Applicant -->
+      <!-- Document 1 -->
       <div>
-        <label for="doc1">
-          First Document
-        </label>
+        <label for="aadhaar1">Primary Applicant's Aadhaar</label>
         <div class="form-row">
           <div>
-            <input type="file" id="doc1" accept=".pdf,.jpg,.jpeg,.png" data-validator-id="validator1" />
-            <div class="file-name" data-file-for="doc1"></div>
+            <input 
+              type="file" 
+              id="aadhaar1" 
+              accept=".pdf,.jpg,.jpeg,.png" 
+              data-validator-id="aadhaar-validator-1"
+              data-agent-id="aadhar_card_validator_s5"
+            />
+            <div class="file-name" data-file-for="aadhaar1"></div>
           </div>
           
           <div>
-            <button class="btn" data-validate-for="doc1" data-validator-id="validator1">
+            <button class="btn" data-validate-for="aadhaar1" data-validator-id="aadhaar-validator-1">
               Validate
             </button>
           </div>
           
           <div class="widget-container">
-            <div data-widget-for="validator1"></div>
+            <div data-widget-for="aadhaar-validator-1"></div>
           </div>
         </div>
       </div>
 
-      <!-- Form 2: Secondary Applicant -->
+      <!-- Document 2 -->
       <div style="margin-top: 20px;">
-        <label for="doc2">
-          Second Document
-        </label>
+        <label for="aadhaar2">Secondary Applicant's Aadhaar</label>
         <div class="form-row">
           <div>
-            <input type="file" id="doc2" accept=".pdf,.jpg,.jpeg,.png" data-validator-id="validator2" />
-            <div class="file-name" data-file-for="doc2"></div>
+            <input 
+              type="file" 
+              id="aadhaar2" 
+              accept=".pdf,.jpg,.jpeg,.png" 
+              data-validator-id="aadhaar-validator-2"
+              data-agent-id="aadhar_card_validator_s5"
+            />
+            <div class="file-name" data-file-for="aadhaar2"></div>
           </div>
           
           <div>
-            <button class="btn" data-validate-for="doc2" data-validator-id="validator2">
+            <button class="btn" data-validate-for="aadhaar2" data-validator-id="aadhaar-validator-2">
               Validate
             </button>
           </div>
           
           <div class="widget-container">
-            <div data-widget-for="validator2"></div>
+            <div data-widget-for="aadhaar-validator-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section: PAN Cards -->
+    <div class="form-section">
+      <div class="section-title">
+        PAN Card Validation
+      </div>
+      
+      <div>
+        <label for="pan1">Primary Applicant's PAN Card</label>
+        <div class="form-row">
+          <div>
+            <input 
+              type="file" 
+              id="pan1" 
+              accept=".pdf,.jpg,.jpeg,.png" 
+              data-validator-id="pan-validator-1"
+              data-agent-id="pan_card_validator_s2"
+            />
+            <div class="file-name" data-file-for="pan1"></div>
+          </div>
+          
+          <div>
+            <button class="btn" data-validate-for="pan1" data-validator-id="pan-validator-1">
+              Validate
+            </button>
+          </div>
+          
+          <div class="widget-container">
+            <div data-widget-for="pan-validator-1"></div>
           </div>
         </div>
       </div>
 
-      <!-- Form 3: Third Applicant (Optional) -->
       <div style="margin-top: 20px;">
-        <label for="doc3">
-          Third Document
-        </label>
+        <label for="pan2">Secondary Applicant's PAN Card</label>
         <div class="form-row">
           <div>
-            <input type="file" id="doc3" accept=".pdf,.jpg,.jpeg,.png" data-validator-id="validator3" />
-            <div class="file-name" data-file-for="doc3"></div>
+            <input 
+              type="file" 
+              id="pan2" 
+              accept=".pdf,.jpg,.jpeg,.png" 
+              data-validator-id="pan-validator-2"
+              data-agent-id="pan_card_validator_s2"
+            />
+            <div class="file-name" data-file-for="pan2"></div>
           </div>
           
           <div>
-            <button class="btn" data-validate-for="doc3" data-validator-id="validator3">
+            <button class="btn" data-validate-for="pan2" data-validator-id="pan-validator-2">
               Validate
             </button>
           </div>
           
           <div class="widget-container">
-            <div data-widget-for="validator3"></div>
+            <div data-widget-for="pan-validator-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section: Driving License -->
+    <div class="form-section">
+      <div class="section-title">
+        Driving License Validation
+      </div>
+      
+      <div>
+        <label for="license">Driving License</label>
+        <div class="form-row">
+          <div>
+            <input 
+              type="file" 
+              id="license" 
+              accept=".pdf,.jpg,.jpeg,.png" 
+              data-validator-id="license-validator"
+              data-agent-id="dl_validator_s1"
+            />
+            <div class="file-name" data-file-for="license"></div>
+          </div>
+          
+          <div>
+            <button class="btn" data-validate-for="license" data-validator-id="license-validator">
+              Validate
+            </button>
+          </div>
+          
+          <div class="widget-container">
+            <div data-widget-for="license-validator"></div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="footer-note">
-      Please ensure the document is clear and readable. This is not an official government website.
+      <strong>💡 Tip:</strong> Validate documents from different agents, then click the purple bubble to switch between agent logs!
     </div>
 
   </div>
 
+  <!-- Load the widget library -->
   <script src="../widget/dist/doc-validator-widget.js"></script>
 
   <script>
-    // The client just needs to include this simple script
+    // Simple one-liner initialization
     document.addEventListener('DOMContentLoaded', () => {
-      // Auto-initialize all widgets
       DocumentValidator.autoInitialize();
     });
   </script>

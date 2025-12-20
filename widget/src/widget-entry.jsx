@@ -8,7 +8,7 @@ const container = document.createElement("div");
 container.id = "document-validator-widget-root";
 document.body.appendChild(container);
 
-// Mount React
+// Mount React - no need to pass agentId, WidgetApp discovers them automatically
 createRoot(container).render(
   <React.StrictMode>
     <WidgetApp store={widgetStore} />
